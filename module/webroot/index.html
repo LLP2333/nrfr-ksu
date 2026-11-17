@@ -2,43 +2,85 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Nrfr KSU</title>
 <style>
   :root {
-    --bg: #f6f7f9; --card: #fff; --fg: #1b1d21; --muted: #6b7280;
-    --line: #e3e5e9; --accent: #2563eb; --accent-fg: #fff; --danger: #dc2626; --ok: #16a34a;
+    --bg: #f6f7f9; --card: #fff; --fg: #1b1d21; --muted: #6b7280; --hover: #f0f2f5;
+    --line: #e3e5e9; --accent: #2563eb; --accent-soft: #e8f0fe; --accent-fg: #fff;
+    --danger: #dc2626; --ok: #16a34a; --scrim: rgba(0,0,0,.4);
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #111316; --card: #1b1e23; --fg: #e8eaed; --muted: #9aa0a8;
-      --line: #2c3036; --accent: #3b82f6; --danger: #f87171; --ok: #4ade80;
+      --bg: #111316; --card: #1b1e23; --fg: #e8eaed; --muted: #9aa0a8; --hover: #24282e;
+      --line: #2c3036; --accent: #3b82f6; --accent-soft: #1e2a40;
+      --danger: #f87171; --ok: #4ade80; --scrim: rgba(0,0,0,.6);
     }
   }
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body { margin: 0; padding: 16px; background: var(--bg); color: var(--fg);
          font: 15px/1.5 system-ui, -apple-system, "PingFang SC", sans-serif; }
+  body.lock { overflow: hidden; }
   h1 { font-size: 20px; margin: 4px 0 2px; }
   .sub { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px;
           padding: 14px; margin-bottom: 12px; }
-  .row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
   .title { font-weight: 600; }
   .meta { color: var(--muted); font-size: 13px; }
-  .badge { font-size: 12px; padding: 1px 8px; border-radius: 99px; border: 1px solid var(--line); }
+  .badge { font-size: 12px; padding: 1px 8px; border-radius: 99px; border: 1px solid var(--line);
+           color: var(--muted); white-space: nowrap; }
   .badge.on { color: var(--ok); border-color: var(--ok); }
-  label { display: block; font-size: 13px; color: var(--muted); margin: 10px 0 4px; }
-  input { width: 100%; padding: 9px 10px; border-radius: 8px; border: 1px solid var(--line);
-          background: var(--bg); color: var(--fg); font-size: 15px; }
-  .btns { display: flex; gap: 8px; margin-top: 12px; }
-  button { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--line);
-           background: var(--card); color: var(--fg); font-size: 15px; }
-  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
-  button.danger { color: var(--danger); }
-  button:disabled { opacity: .5; }
+  label { display: block; font-size: 13px; color: var(--muted); margin: 12px 0 6px; }
+  input { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
+          background: var(--bg); color: var(--fg); font-size: 15px; outline: none; }
+  input:focus { border-color: var(--accent); }
+  .picker { width: 100%; display: flex; align-items: center; gap: 10px; text-align: left;
+            padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
+            background: var(--bg); color: var(--fg); font-size: 15px; }
+  .picker .flag { font-size: 22px; line-height: 1; }
+  .picker .nm { flex: 1; }
+  .picker .placeholder { color: var(--muted); }
+  .picker .chev { color: var(--muted); }
+  .code { font: 13px ui-monospace, Menlo, monospace; color: var(--muted); text-transform: uppercase; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chip { padding: 4px 10px; border-radius: 99px; border: 1px solid var(--line);
+          background: var(--card); color: var(--fg); font-size: 13px; }
+  .chip.sel { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+  .btns { display: flex; gap: 8px; margin-top: 14px; }
+  button { font: inherit; cursor: pointer; }
+  .btn { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--line);
+         background: var(--card); color: var(--fg); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+  .btn.danger { color: var(--danger); }
+  .btn:disabled { opacity: .5; }
   pre { white-space: pre-wrap; word-break: break-all; font-size: 12px; color: var(--muted);
-        margin: 0; max-height: 220px; overflow: auto; }
+        margin: 8px 0 0; max-height: 220px; overflow: auto; }
   .note { font-size: 13px; color: var(--muted); }
+
+  /* bottom sheet */
+  .scrim { position: fixed; inset: 0; background: var(--scrim); opacity: 0; pointer-events: none;
+           transition: opacity .2s; z-index: 10; }
+  .sheet { position: fixed; left: 0; right: 0; bottom: 0; height: 80vh; max-height: 80vh;
+           background: var(--card); border-radius: 16px 16px 0 0; z-index: 11;
+           display: flex; flex-direction: column; transform: translateY(100%); transition: transform .22s ease-out;
+           padding-bottom: env(safe-area-inset-bottom); }
+  .open .scrim { opacity: 1; pointer-events: auto; }
+  .open .sheet { transform: none; }
+  .sheet-head { padding: 10px 16px 8px; border-bottom: 1px solid var(--line); }
+  .grab { width: 36px; height: 4px; border-radius: 2px; background: var(--line); margin: 0 auto 10px; }
+  .sheet-head .row { margin-bottom: 10px; }
+  .x { background: none; border: none; color: var(--muted); font-size: 15px; padding: 4px; }
+  .list { overflow-y: auto; flex: 1; padding: 4px 0 12px; overscroll-behavior: contain; }
+  .sec { font-size: 12px; color: var(--muted); padding: 10px 16px 4px; }
+  .opt { width: 100%; display: flex; align-items: center; gap: 12px; padding: 11px 16px;
+         background: none; border: none; color: var(--fg); text-align: left; font-size: 15px; }
+  .opt:active, .opt:hover { background: var(--hover); }
+  .opt .flag { font-size: 22px; line-height: 1; width: 28px; text-align: center; }
+  .opt .nm { flex: 1; }
+  .opt.sel { color: var(--accent); }
+  .opt.sel::after { content: "✓"; color: var(--accent); }
+  .empty { padding: 24px 16px; text-align: center; color: var(--muted); font-size: 14px; }
 </style>
 </head>
 <body>
@@ -46,20 +88,59 @@
   <div class="sub">修改 SIM 卡国家码 / 运营商名称。仅内存覆盖：禁用模块或重启后自动还原。</div>
   <div id="sims"><div class="card note">读取中…</div></div>
   <div class="card">
-    <div class="row"><span class="title">日志</span><button id="refresh" style="flex:0 0 auto;padding:4px 12px">刷新</button></div>
+    <div class="row"><span class="title">日志</span><button class="btn" id="refresh" style="flex:0 0 auto;padding:4px 12px">刷新</button></div>
     <pre id="log"></pre>
   </div>
-  <datalist id="isos">
-    <option value="jp">日本</option><option value="us">美国</option><option value="gb">英国</option>
-    <option value="kr">韩国</option><option value="hk">中国香港</option><option value="tw">中国台湾</option>
-    <option value="sg">新加坡</option><option value="de">德国</option><option value="fr">法国</option>
-    <option value="ca">加拿大</option><option value="au">澳大利亚</option><option value="cn">中国</option>
-  </datalist>
+
+  <div id="picker-root">
+    <div class="scrim" id="scrim"></div>
+    <div class="sheet" role="dialog" aria-label="选择国家或地区">
+      <div class="sheet-head">
+        <div class="grab"></div>
+        <div class="row"><span class="title" id="sheet-title">选择国家/地区</span><button class="x" id="close">关闭</button></div>
+        <input id="search" type="search" placeholder="搜索名称或代码，如 日本 / jp" autocomplete="off" autocapitalize="off">
+      </div>
+      <div class="list" id="list"></div>
+    </div>
+  </div>
 <script>
 const MOD = '/data/adb/modules/nrfr_ksu';
 const CONF = '/data/adb/nrfr/nrfr.conf';
-const BIN = `MODDIR=${MOD} . ${MOD}/common.sh;`;
+const BIN = `MODDIR=${MOD}; . ${MOD}/common.sh;`;
+const COMMON = ['jp', 'us', 'gb', 'kr', 'hk', 'tw', 'sg', 'de', 'fr', 'ca', 'au', 'cn'];
 
+// ---- country data -------------------------------------------------------
+const FALLBACK = { jp: '日本', us: '美国', gb: '英国', kr: '韩国', hk: '中国香港', tw: '中国台湾',
+  sg: '新加坡', de: '德国', fr: '法国', ca: '加拿大', au: '澳大利亚', cn: '中国', mo: '中国澳门',
+  my: '马来西亚', th: '泰国', vn: '越南', ph: '菲律宾', id: '印度尼西亚', in: '印度', it: '意大利',
+  es: '西班牙', nl: '荷兰', ru: '俄罗斯', br: '巴西', mx: '墨西哥', nz: '新西兰', ae: '阿联酋' };
+let dn = null;
+try { dn = new Intl.DisplayNames(['zh-CN'], { type: 'region', fallback: 'none' }); } catch (e) {}
+const nameOf = (c) => {
+  if (dn) { try { const n = dn.of(c.toUpperCase()); if (n) return n; } catch (e) {} }
+  return FALLBACK[c] || c.toUpperCase();
+};
+const flagOf = (c) => /^[a-z]{2}$/.test(c)
+  ? String.fromCodePoint(...[...c.toUpperCase()].map((ch) => 0x1F1E6 + ch.charCodeAt(0) - 65)) : '🏳️';
+const COUNTRIES = (() => {
+  // non-country / pseudo region codes that Intl still names
+  const skip = new Set(['eu', 'ez', 'un', 'zz', 'qo', 'xa', 'xb', 'aa', 'qm', 'xx',
+    'ac', 'cp', 'cq', 'dg', 'ea', 'ic', 'ta']);
+  const out = [];
+  if (dn) {
+    for (let a = 97; a <= 122; a++) for (let b = 97; b <= 122; b++) {
+      const c = String.fromCharCode(a, b);
+      if (skip.has(c)) continue;
+      let n; try { n = dn.of(c.toUpperCase()); } catch (e) {}
+      if (n && n.toUpperCase() !== c.toUpperCase()) out.push(c);
+    }
+  }
+  if (out.length < 50) return Object.keys(FALLBACK);
+  return out;
+})().map((c) => ({ code: c, name: nameOf(c) }))
+    .sort((x, y) => x.name.localeCompare(y.name, 'zh-CN'));
+
+// ---- ksu bridge -----------------------------------------------------------
 let seq = 0;
 function exec(cmd) {
   return new Promise((resolve) => {
@@ -78,7 +159,7 @@ async function readConf() {
   const conf = {};
   for (const line of (r.out || '').split('\n')) {
     const m = line.trim().match(/^([1-4])\s*=\s*([^,]*)(?:,(.*))?$/);
-    if (m) conf[m[1]] = { iso: m[2].trim(), name: (m[3] || '').trim() };
+    if (m) conf[m[1]] = { iso: m[2].trim().toLowerCase(), name: (m[3] || '').trim() };
   }
   return conf;
 }
@@ -92,6 +173,22 @@ async function writeConf(conf) {
   return exec(`mkdir -p /data/adb/nrfr && printf %s ${q(body)} > ${CONF}`);
 }
 
+// ---- cards ------------------------------------------------------------------
+function pickerHtml(iso) {
+  return iso
+    ? `<span class="flag">${flagOf(iso)}</span><span class="nm">${esc(nameOf(iso))}</span><span class="code">${esc(iso)}</span><span class="chev">▾</span>`
+    : `<span class="flag">🌐</span><span class="nm placeholder">选择国家/地区</span><span class="chev">▾</span>`;
+}
+function chipsHtml(iso) {
+  return COMMON.slice(0, 6).map((c) =>
+    `<button class="chip ${c === iso ? 'sel' : ''}" data-iso="${c}">${flagOf(c)} ${esc(nameOf(c))}</button>`).join('');
+}
+function setCardIso(card, iso) {
+  card.dataset.iso = iso;
+  card.querySelector('.picker').innerHTML = pickerHtml(iso);
+  card.querySelector('.chips').innerHTML = chipsHtml(iso);
+}
+
 async function render() {
   const [list, conf] = await Promise.all([exec(`${BIN} nrfr list`), readConf()]);
   const box = document.getElementById('sims');
@@ -102,17 +199,19 @@ async function render() {
   box.innerHTML = sims.map((s) => {
     const c = conf[s.slot] || { iso: '', name: '' };
     const on = s.override_iso !== '';
-    return `<div class="card" data-slot="${s.slot}">
+    const cur = s.iso ? `${flagOf(s.iso)} ${esc(nameOf(s.iso))}（${esc(s.iso)}）` : '-';
+    return `<div class="card" data-slot="${s.slot}" data-iso="${esc(c.iso)}">
       <div class="row"><span class="title">卡槽 ${s.slot} · ${esc(s.carrier)}</span>
         <span class="badge ${on ? 'on' : ''}">${on ? '已覆盖' : '原始'}</span></div>
-      <div class="meta">当前国家码 ${esc(s.iso || '-')}${s.override_name ? ' · 运营商名 ' + esc(s.override_name) : ''}</div>
-      <label>国家码（两位字母）</label>
-      <input class="iso" list="isos" maxlength="2" placeholder="如 jp" value="${esc(c.iso)}" autocapitalize="off">
+      <div class="meta">当前：${cur}${s.override_name ? ' · 运营商名 ' + esc(s.override_name) : ''}</div>
+      <label>目标国家/地区</label>
+      <button class="picker" data-act="pick">${pickerHtml(c.iso)}</button>
+      <div class="chips">${chipsHtml(c.iso)}</div>
       <label>运营商名称（可选）</label>
       <input class="name" placeholder="留空则不修改" value="${esc(c.name)}">
       <div class="btns">
-        <button class="danger" data-act="reset">还原</button>
-        <button class="primary" data-act="save">保存并应用</button>
+        <button class="btn danger" data-act="reset">还原</button>
+        <button class="btn primary" data-act="save">保存并应用</button>
       </div></div>`;
   }).join('');
 }
@@ -124,15 +223,18 @@ async function apply() {
 }
 
 document.getElementById('sims').addEventListener('click', async (e) => {
+  const chip = e.target.closest('.chip');
+  if (chip) { setCardIso(chip.closest('.card'), chip.dataset.iso); return; }
   const btn = e.target.closest('button[data-act]');
   if (!btn) return;
   const card = btn.closest('.card');
   const slot = card.dataset.slot;
+  if (btn.dataset.act === 'pick') { openSheet(card); return; }
   const conf = await readConf();
   if (btn.dataset.act === 'save') {
-    const iso = card.querySelector('.iso').value.trim().toLowerCase();
-    const name = card.querySelector('.name').value.replace(/[\r\n,]/g, ' ').trim();
-    if (!/^[a-z]{2}$/.test(iso)) { toast('国家码需为两位字母'); return; }
+    const iso = card.dataset.iso;
+    const name = card.querySelector('.name').value.replace(/[\r\n,]+/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!/^[a-z]{2}$/.test(iso)) { toast('请先选择国家/地区'); openSheet(card); return; }
     conf[slot] = { iso, name };
   } else {
     delete conf[slot];
@@ -142,6 +244,59 @@ document.getElementById('sims').addEventListener('click', async (e) => {
   const r = await apply();
   toast(r.code === 0 ? '已应用' : '应用失败，查看日志');
 });
+
+// ---- picker sheet -------------------------------------------------------------
+const root = document.getElementById('picker-root');
+const listEl = document.getElementById('list');
+const search = document.getElementById('search');
+let target = null;
+
+function optHtml(c, sel) {
+  return `<button class="opt ${c.code === sel ? 'sel' : ''}" data-iso="${c.code}">
+    <span class="flag">${flagOf(c.code)}</span><span class="nm">${esc(c.name)}</span><span class="code">${c.code}</span></button>`;
+}
+function renderList() {
+  const sel = target ? target.dataset.iso : '';
+  const kw = search.value.trim().toLowerCase();
+  let html = '';
+  if (!kw) {
+    html += '<div class="sec">常用</div>' + COMMON.map((c) => optHtml({ code: c, name: nameOf(c) }, sel)).join('');
+    html += '<div class="sec">全部</div>' + COUNTRIES.map((c) => optHtml(c, sel)).join('');
+  } else {
+    const hits = COUNTRIES.filter((c) => c.code === kw || c.code.startsWith(kw) || c.name.toLowerCase().includes(kw));
+    hits.sort((a, b) => (b.code === kw) - (a.code === kw));
+    html = hits.map((c) => optHtml(c, sel)).join('');
+    if (/^[a-z]{2}$/.test(kw) && !hits.some((c) => c.code === kw)) {
+      html = `<div class="sec">自定义代码</div>` + optHtml({ code: kw, name: '使用 ' + kw.toUpperCase() }, sel) + html;
+    }
+    if (!html) html = '<div class="empty">没有匹配的国家/地区<br>也可以直接输入两位字母代码</div>';
+  }
+  listEl.innerHTML = html;
+  listEl.scrollTop = 0;
+}
+function openSheet(card) {
+  target = card;
+  document.getElementById('sheet-title').textContent = `卡槽 ${card.dataset.slot} · 选择国家/地区`;
+  search.value = '';
+  renderList();
+  root.classList.add('open');
+  document.body.classList.add('lock');
+}
+function closeSheet() {
+  root.classList.remove('open');
+  document.body.classList.remove('lock');
+  search.blur();
+  target = null;
+}
+search.addEventListener('input', renderList);
+listEl.addEventListener('click', (e) => {
+  const o = e.target.closest('.opt');
+  if (!o || !target) return;
+  setCardIso(target, o.dataset.iso);
+  closeSheet();
+});
+document.getElementById('scrim').onclick = closeSheet;
+document.getElementById('close').onclick = closeSheet;
 
 async function showLog() {
   const r = await exec('tail -n 40 /data/adb/nrfr/nrfr.log 2>/dev/null');
