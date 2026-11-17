@@ -17,7 +17,7 @@
 
 ## 使用
 
-安装 `out/nrfr-ksu-<版本>.zip` 后重启，然后用下面任意一种方式设置：
+从 [Releases](https://github.com/LLP2333/nrfr-ksu/releases/latest) 下载 `nrfr-ksu-<版本>.zip`，在 KernelSU 管理器里安装并重启（之后可以在管理器里检查更新），然后用下面任意一种方式设置：
 
 - **WebUI**：在 KernelSU 管理器里打开本模块，按卡槽填写国家码和（可选的）运营商名称，点"保存并应用"。
 - **Action 按钮**：重新应用配置并显示当前状态。
