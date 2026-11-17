@@ -1,0 +1,6 @@
+id=nrfr_ksu
+name=Nrfr KSU
+version=v1.0.0
+versionCode=1
+author=nrfr-ksu
+description=Root 版 SIM 卡国家码 / 运营商名称修改（内存覆盖，禁用模块并重启即还原）

@@ -1,0 +1,10 @@
+#!/system/bin/sh
+# Command-line entry (needs root): nrfr list | set <slot> <iso> [name] | reset <slot|all> | apply [conf]
+MODDIR=${0%/*}
+. "$MODDIR/common.sh"
+if [ "$1" = apply ]; then
+    [ -n "$2" ] && CONF=$2
+    apply_conf
+    exit $?
+fi
+nrfr "$@"
